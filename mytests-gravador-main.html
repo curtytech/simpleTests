@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+      integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+      crossorigin="anonymous"
+    ></script>
+
+    <button type="button" id="btn">Start</button>
+
+    <script>
+      $(function () {
+        let mediaRecorder;
+
+        navigator.mediaDevices
+          .getUserMedia({ audio: true })
+          .then(function (stream) {
+            mediaRecorder = new MediaRecorder(stream);
+
+            let chunks = [];
+            mediaRecorder.ondataavailable = function (e) {
+              console.log(e.data);
+              chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = function () {
+              console.log("stop");
+
+              let blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
+              const reader = new window.FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = function () {
+                console.log(reader.result);
+                const audio = document.createElement("audio");
+                audio.src = reader.result;
+                audio.controls = true;
+                document.body.appendChild(audio);
+              };
+            };
+
+            // mediaRecorder.start();
+            $("#btn").click(function () {
+              if ($(this).text() === "Start") {
+                mediaRecorder.start();
+                $(this).text("Stop");
+              } else {
+                mediaRecorder.stop();
+              }
+            });
+          });
+
+      });
+    </script>
+  </body>
+</html>
